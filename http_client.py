@@ -47,7 +47,7 @@ def send_request(url):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect((url_host, url_port))
 
-    req = "GET /{} HTTP/1.0\r\nHost:{}\r\n\r\n".format(url_path, url_host)
+    req = "GET /{} HTTP/1.0\r\nHost:{}\r\nAccept: text/html\r\n\r\n".format(url_path, url_host)
     req = bytes(req, encoding='utf-8')
     sock.send(req)
     return sock.recv(2**25, socket.MSG_WAITALL).decode('utf-8')
