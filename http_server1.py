@@ -21,7 +21,8 @@ while True:
         
         request = connection.recv(2**25).decode('utf-8')
         print(request)
-            
+        
+    # after this point, copilot wrote it      
     finally:
         # Clean up the connection
         connection.close()
