@@ -24,10 +24,10 @@ def parse_url(url):
                 return host, path, int(body[1])
             else:
                 error_print("Invalid URL: ports must be integers")
-                sys.exit(1)  # TODO: ask about different exit codes
+                sys.exit(1)
         elif len(body) > 2:
             error_print("Invalid URL: must not have more than one port")
-            sys.exit(1)
+            sys.exit(2)
         else:
             if "/" in body[0]:
                 inds = body[0].split("/")
@@ -40,7 +40,7 @@ def parse_url(url):
             return host, path, 80
     else:
         error_print("Invalid URL: all URLs must start with 'http://'")
-        sys.exit(1)
+        sys.exit(3)
 
 def send_request(url):
     url_host, url_path, url_port = parse_url(url)
@@ -70,12 +70,12 @@ def parse_response(response):
                     header_dict[line[0].lower()] = [line[1]]
         else:
             error_print("Invalid response: must have exactly one blank line")
-            sys.exit(3)
+            sys.exit(4)
 
         if code >= 400:
             error_print("Invalid response: status code {}".format(code))
             print(body)
-            sys.exit(2)
+            sys.exit(5)
 
         elif code == 301 or code == 302:
             error_print("Redirected to {}".format(header_dict["location"][0]))
@@ -86,11 +86,8 @@ def parse_response(response):
             sys.exit(0)
     else:
         error_print("Invalid response: must have Content-Type: text/html")
-        sys.exit(3)
+        sys.exit(6)
     
-        
-
-# TODO: ask about timeouts
 
 url = sys.argv[1]
 
@@ -99,4 +96,4 @@ for i in range(10):
     url = parse_response(response)
 
 error_print("Too many redirects")
-sys.exit(4)
+sys.exit(7)
