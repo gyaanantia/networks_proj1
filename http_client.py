@@ -5,7 +5,6 @@ import socket
 def error_print(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
-
 def parse_url(url):
     if url.startswith('http://'):
         body = url.replace('http://', '')
@@ -43,21 +42,61 @@ def parse_url(url):
         error_print("Invalid URL: all URLs must start with 'http://'")
         sys.exit(1)
 
+def send_request(url):
+    url_host, url_path, url_port = parse_url(url)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect((url_host, url_port))
+
+    req = "GET /{} HTTP/1.0\r\nHost:{}\r\n\r\n".format(url_path, url_host)
+    req = bytes(req, encoding='utf-8')
+    sock.send(req)
+    return sock.recv(2**25, socket.MSG_WAITALL).decode('utf-8')
+
+def parse_response(response):
+    if "Content-Type: text/html" in response:
+        resp_list = response.split("\r\n\r\n")
+        if len(resp_list) == 2:
+            header = resp_list[0].split("\r\n")
+            body = resp_list[1]
+            code = int(header[0].split(" ")[1])
+            header.remove(header[0])
+
+            header_dict = {}
+            for line in header:
+                line = line.split(": ")
+                if line[0] in header_dict:
+                    header_dict[line[0].lower()].append(line[1])
+                else:
+                    header_dict[line[0].lower()] = [line[1]]
+        else:
+            error_print("Invalid response: must have exactly one blank line")
+            sys.exit(3)
+
+        if code >= 400:
+            error_print("Invalid response: status code {}".format(code))
+            print(body)
+            sys.exit(2)
+
+        elif code == 301 or code == 302:
+            error_print("Redirected to {}".format(header_dict["location"][0]))
+            return header_dict["location"][0]
+        
+        elif code == 200:
+            print(body)
+            sys.exit(0)
+    else:
+        error_print("Invalid response: must have Content-Type: text/html")
+        sys.exit(3)
+    
+        
 
 # TODO: ask about timeouts
 
 url = sys.argv[1]
-url_host, url_path, url_port = parse_url(url)
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.connect((url_host, url_port))
 
-req = "GET /{} HTTP/1.0\r\nHost:{}\r\n\r\n".format(url_path, url_host)
-req = bytes(req, encoding='utf-8')
-sock.send(req)
-response = sock.recv(2**25, socket.MSG_WAITALL).decode('utf-8')
-print(response)
-sock.close()
-sys.exit(0)
-# request = "GET ..... {} .......".format(sys.argv[1])
-#
-# request = bytes(string, encoding="utf-8")
+for i in range(10):
+    response = send_request(url)
+    url = parse_response(response)
+
+error_print("Too many redirects")
+sys.exit(4)
