@@ -43,9 +43,10 @@ while True:
         if path.startswith("/"):
             path = path[1:]
 
+
         if not os.path.exists(path):
             # print(2)
-            if not (path.endswith(".html") or path.endswith(".htm")):
+            if not (path.endswith(".html") or path.endswith(".htm")): # TODO: Are we supposed to fix it like this?
                 # print(2.5)
                 path += ".html"
 
@@ -59,7 +60,8 @@ while True:
                 # send a 403 response to the client
                 response = "HTTP/1.0 403 Forbidden\r\nContent-Type: text/html\r\n\r\n"
                 connection.sendall(bytes(response, encoding='utf-8'))
-        elif not (path.endswith(".html") or path.endswith(".htm")):
+
+        elif not (path.endswith(".html") or path.endswith(".htm")): 
             # print(5)
             # send a 403 response to the client
             response = "HTTP/1.0 403 Forbidden\r\nContent-Type: text/html\r\n\r\n"
@@ -78,5 +80,4 @@ while True:
         print("closing connection")
         # Clean up the connection
         connection.close()
-
 

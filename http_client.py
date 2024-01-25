@@ -5,29 +5,55 @@ import socket
 def error_print(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
+
 def parse_url(url):
-    if url.startswith('http://'):
-        body = url.replace('http://', '')
-        while body[-1] == '/':
+    if url.startswith("http://"):
+        body = url.replace("http://", "")
+        while body[-1] == "/":
             body = body[:-1]
         body = body.split(":")
-        if len(body) == 2: # TODO: this is wrong, the port does not always go at the end, the path goes after
-            if body[1].isnumeric():
-                if "/" in body[0]:
-                    inds = body[0].split("/")
-                    host = inds[0]
-                    inds.remove(host)
-                    path = "/".join(inds)
-                else:
-                    host = body[0]
-                    path = ""
-                return host, path, int(body[1])
+        if (len(body) == 2):  # TODO: this is wrong, the port does not always go at the end, the path goes after
+
+            # if second portion has /, take from 0 to that index
+            # eg. http://moore.wot.eecs.northwestern.edu:10002/rfc2616.html
+            # vs. http://portquiz.net:8080/ or http://portquiz.net:8080
+            # http://moore.wot.eecs.northwestern.edu/rfc2616.html
+
+            host = body[0]
+
+            if "/" in body[1]:
+                index_port_end = body[1].find("/")
+                port = body[1][0 : index_port_end - 1]
+                if port.isnumeric() == False:
+                    error_print("Invalid URL: ports must be integers")
+                    sys.exit(1)
+                path = body[1][index_port_end:]
+
             else:
-                error_print("Invalid URL: ports must be integers")
-                sys.exit(1)
+                port = body[1]
+                path = ""
+
+            return host, path, port
+
+            # if port.isnumeric():
+            #     if "/" in body[0]:
+            #         inds = body[0].split("/")
+            #         host = inds[0]
+            #         inds.remove(host)
+            #         path = "/".join(inds)
+            #     else:
+            #         host = body[0]
+            #         path = ""
+            #     return host, path, int(body[1])
+            # else:
+            #     error_print("Invalid URL: ports must be integers")
+            #     sys.exit(1)
+            
+
         elif len(body) > 2:
             error_print("Invalid URL: must not have more than one port")
             sys.exit(2)
+
         else:
             if "/" in body[0]:
                 inds = body[0].split("/")
@@ -42,15 +68,19 @@ def parse_url(url):
         error_print("Invalid URL: all URLs must start with 'http://'")
         sys.exit(3)
 
+
 def send_request(url):
     url_host, url_path, url_port = parse_url(url)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect((url_host, url_port))
 
-    req = "GET /{} HTTP/1.0\r\nHost:{}\r\nAccept: text/html\r\n\r\n".format(url_path, url_host)
-    req = bytes(req, encoding='utf-8')
+    req = "GET /{} HTTP/1.0\r\nHost:{}\r\nAccept: text/html\r\n\r\n".format(
+        url_path, url_host
+    )
+    req = bytes(req, encoding="utf-8")
     sock.send(req)
-    return sock.recv(2**25, socket.MSG_WAITALL).decode('utf-8')
+    return sock.recv(2**25, socket.MSG_WAITALL).decode("utf-8")
+
 
 def parse_response(response):
     if "Content-Type: text/html" in response:
@@ -80,14 +110,14 @@ def parse_response(response):
         elif code == 301 or code == 302:
             error_print("Redirected to {}".format(header_dict["location"][0]))
             return header_dict["location"][0]
-        
+
         elif code == 200:
             print(body)
             sys.exit(0)
     else:
         error_print("Invalid response: must have Content-Type: text/html")
         sys.exit(6)
-    
+
 
 url = sys.argv[1]
 
