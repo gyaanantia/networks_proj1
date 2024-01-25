@@ -18,7 +18,7 @@ while True:
     connection, client_address = server.accept()
 
     try:
-        print('connection from', client_address)
+        # print('connection from', client_address)
         
         request = connection.recv(2**25).decode('utf-8')
         # print("------------------   REQUEST   -----------------------")
@@ -32,7 +32,7 @@ while True:
         # print("-------------------------------------------------------")
         
         if request_list[0].split(" ")[0] != 'GET':
-            print(1)
+            # print(1)
             # send a 405 response to the client
             response = "HTTP/1.0 405 Method Not Allowed\r\nContent-Type: text/html\r\n\r\n"
             connection.sendall(bytes(response, encoding='utf-8'))
@@ -44,28 +44,28 @@ while True:
             path = path[1:]
 
         if not os.path.exists(path):
-            print(2)
+            # print(2)
             if not (path.endswith(".html") or path.endswith(".htm")):
-                print(2.5)
+                # print(2.5)
                 path += ".html"
 
             if not os.path.exists(path):
-                print(3)
+                # print(3)
                 # send a 404 response to the client
                 response = "HTTP/1.0 404 Not Found\r\nContent-Type: text/html\r\n\r\n"
                 connection.sendall(bytes(response, encoding='utf-8'))
             else:
-                print(4)
+                # print(4)
                 # send a 403 response to the client
                 response = "HTTP/1.0 403 Forbidden\r\nContent-Type: text/html\r\n\r\n"
                 connection.sendall(bytes(response, encoding='utf-8'))
         elif not (path.endswith(".html") or path.endswith(".htm")):
-            print(5)
+            # print(5)
             # send a 403 response to the client
             response = "HTTP/1.0 403 Forbidden\r\nContent-Type: text/html\r\n\r\n"
             connection.sendall(bytes(response, encoding='utf-8'))
         else:
-            print(6)
+            # print(6)
             # send a 200 response to the client
             response = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n"
             connection.send(bytes(response, encoding='utf-8'))
@@ -73,8 +73,6 @@ while True:
                 for line in f:
                     connection.send(bytes(line, encoding='utf-8'))
             f.close()
-        
-        connection.close()
       
     finally:
         print("closing connection")
