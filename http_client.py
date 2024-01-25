@@ -11,7 +11,7 @@ def parse_url(url):
         while body[-1] == '/':
             body = body[:-1]
         body = body.split(":")
-        if len(body) == 2:
+        if len(body) == 2: # TODO: this is wrong, the port does not always go at the end, the path goes after
             if body[1].isnumeric():
                 if "/" in body[0]:
                     inds = body[0].split("/")
