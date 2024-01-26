@@ -77,7 +77,7 @@ while True:
                                     r_socket.send(bytes(line, encoding='utf-8'))
                             f.close()
 
-                        read_list.remove(r_socket)
+                read_list.remove(r_socket)
             except UnicodeDecodeError:
                 # print("UnicodeDecodeError")
                 if req == b'\xff\xf4\xff\xfd\x06':
