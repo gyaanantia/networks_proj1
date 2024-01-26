@@ -110,10 +110,11 @@ while True:
                                 response = "HTTP/1.0 200 OK\r\nContent-Type: application/json\r\n\r\n"
                                 response_dict = {"operation": "product", "operands": operands_list, "result": result}
                                 response += json.dumps(response_dict)
+                                response += "\r\n"
                                 connection.sendall(bytes(response, encoding='utf-8'))
                                 print("------------------   RESPONSE   ------------------")
                                 print(response)
-                                
+
     except UnicodeDecodeError:
         if req == b'\xff\xf4\xff\xfd\x06':
             print("telnet end of request")

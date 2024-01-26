@@ -15,7 +15,7 @@ server.setblocking(False) # making everything non-blocking
 
 
 read_list = [server]
-write_list = []
+
 
 while True:
     print("waiting for a connection")
@@ -23,7 +23,7 @@ while True:
     # print(read_list)
     # print("write_list")
     # print(write_list)
-    read_socket, write_socket, exception_socket = select.select(read_list, write_list, read_list)
+    read_socket, _, _ = select.select(read_list, [], read_list)
     # print("read_socket")
     # print(read_socket)
     # print("write_socket")
@@ -41,7 +41,6 @@ while True:
                 req = r_socket.recv(2**25)
                 print(" ====================   REQUEST   ==================== ")
                 print(repr(req))
-                # TODO: ask about telnet sending strange bytes
                 request = req.decode('utf-8')
 
                 request_list = request.split("\r\n")
@@ -92,7 +91,4 @@ while True:
                 print("closing connection")
                 r_socket.close()
     
-    for e_socket in exception_socket:
-        read_list.remove(e_socket)
-        e_socket.close()
 
