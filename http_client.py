@@ -34,20 +34,6 @@ def parse_url(url):
                 path = ""
 
             return host, path, int(port)
-
-            # if port.isnumeric():
-            #     if "/" in body[0]:
-            #         inds = body[0].split("/")
-            #         host = inds[0]
-            #         inds.remove(host)
-            #         path = "/".join(inds)
-            #     else:
-            #         host = body[0]
-            #         path = ""
-            #     return host, path, int(body[1])
-            # else:
-            #     error_print("Invalid URL: ports must be integers")
-            #     sys.exit(1)
             
 
         elif len(body) > 2:
