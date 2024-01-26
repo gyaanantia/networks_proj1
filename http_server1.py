@@ -50,7 +50,7 @@ while True:
                 # print(path)
                 if not os.path.exists(path):
                     # print(2)
-                    if not (path.endswith(".html") or path.endswith(".htm")): # TODO: Are we supposed to fix it like this?
+                    if not (path.endswith(".html") or path.endswith(".htm")): 
                         # print(2.5)
                         path += ".html"
 

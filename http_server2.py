@@ -41,6 +41,7 @@ while True:
                 req = r_socket.recv(2**25)
                 print(" ====================   REQUEST   ==================== ")
                 print(repr(req))
+                # TODO: ask about telnet sending strange bytes
                 request = req.decode('utf-8')
 
                 request_list = request.split("\r\n")
