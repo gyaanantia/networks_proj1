@@ -19,8 +19,8 @@ while True:
 
     try:
         # print('connection from', client_address)
-        
-        request = connection.recv(2**25).decode('utf-8')
+        req = connection.recv(2**25)
+        request = req.decode('utf-8')
         # print("------------------   REQUEST   -----------------------")
         # print(request)
         # print("-------------------------------------------------------")
@@ -79,6 +79,13 @@ while True:
                         for line in f:
                             connection.send(bytes(line, encoding='utf-8'))
                     f.close()
+
+    except UnicodeDecodeError:
+        if req == b'\xff\xf4\xff\xfd\x06':
+            print("telnet end of request")
+        else:
+            response = "HTTP/1.0 400 Bad Request\r\nContent-Type: text/html\r\n\r\n"
+            connection.send(bytes(response, encoding='utf-8'))
       
     finally:
         print("closing connection")

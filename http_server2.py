@@ -79,6 +79,15 @@ while True:
                             f.close()
 
                         read_list.remove(r_socket)
+            except UnicodeDecodeError:
+                # print("UnicodeDecodeError")
+                if req == b'\xff\xf4\xff\xfd\x06':
+                    print("telnet end of request")
+                else:
+                    response = "HTTP/1.0 400 Bad Request\r\nContent-Type: text/html\r\n\r\n"
+                    r_socket.send(bytes(response, encoding='utf-8'))
+                read_list.remove(r_socket)
+                # print("removed r_socket")
             finally:
                 print("closing connection")
                 r_socket.close()

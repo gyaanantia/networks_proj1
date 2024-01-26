@@ -20,8 +20,8 @@ while True:
 
     try:
         # print('connection from', client_address)
-        
-        request = connection.recv(2**25).decode('utf-8')
+        req = connection.recv(2**25)
+        request = req.decode('utf-8')
         # print("------------------   REQUEST   -----------------------")
         # print(request)
         # print("-------------------------------------------------------")
@@ -37,7 +37,7 @@ while True:
             if request_list[0].split(" ")[0] != 'GET':
                 # print(1)
                 # send a 405 response to the client
-                response = "HTTP/1.0 405 Method Not Allowed\r\nContent-Type: application/json\r\n\r\n"
+                response = "HTTP/1.0 405 Method Not Allowed\r\nContent-Type: text/html\r\n\r\n"
                 connection.sendall(bytes(response, encoding='utf-8'))
                 connection.close()
 
@@ -52,18 +52,18 @@ while True:
                     
                 if not path.startswith("product"):
                     print(2)
-                    response = "HTTP/1.0 404 Not Found\r\nContent-Type: application/json\r\n\r\n" #TODO: Is this right? should we change it to text/html?
+                    response = "HTTP/1.0 404 Not Found\r\nContent-Type: text/html\r\n\r\n"
                     connection.sendall(bytes(response, encoding='utf-8'))
                 else:
                     if "?" not in path:
                         print(3)
-                        response = "HTTP/1.0 400 Bad Request\r\nContent-Type: application/json\r\n\r\n"
+                        response = "HTTP/1.0 400 Bad Request\r\nContent-Type: text/html\r\n\r\n"
                         connection.sendall(bytes(response, encoding='utf-8'))
                     else:
                         params = path.split("?")[1]
                         if params == "":
                             print(4)
-                            response = "HTTP/1.0 400 Bad Request\r\nContent-Type: application/json\r\n\r\n"
+                            response = "HTTP/1.0 400 Bad Request\r\nContent-Type: text/html\r\n\r\n"
                             connection.sendall(bytes(response, encoding='utf-8'))
                         else:
                             params = params.split("&")
@@ -73,7 +73,7 @@ while True:
                             for param in params:
                                 if "=" not in param:
                                     print(5)
-                                    response = "HTTP/1.0 400 Bad Request\r\nContent-Type: application/json\r\n\r\n"
+                                    response = "HTTP/1.0 400 Bad Request\r\nContent-Type: text/html\r\n\r\n"
                                     connection.sendall(bytes(response, encoding='utf-8'))
                                     bad_request = True
                                     break
@@ -85,7 +85,7 @@ while True:
                                         operands_list.append(float(value))
                                     except ValueError:
                                         print(6)
-                                        response = "HTTP/1.0 400 Bad Request\r\nContent-Type: application/json\r\n\r\n"
+                                        response = "HTTP/1.0 400 Bad Request\r\nContent-Type: text/html\r\n\r\n"
                                         connection.sendall(bytes(response, encoding='utf-8'))
                                         bad_request = True
                                         break
@@ -113,7 +113,13 @@ while True:
                                 connection.sendall(bytes(response, encoding='utf-8'))
                                 print("------------------   RESPONSE   ------------------")
                                 print(response)
-
+                                
+    except UnicodeDecodeError:
+        if req == b'\xff\xf4\xff\xfd\x06':
+            print("telnet end of request")
+        else:
+            response = "HTTP/1.0 400 Bad Request\r\nContent-Type: text/html\r\n\r\n"
+            connection.send(bytes(response, encoding='utf-8'))
                             
     finally:
         print("closing connection")
