@@ -17,53 +17,67 @@ server.setblocking(False) # making everything non-blocking
 read_list = [server]
 write_list = []
 
-while len(read_list) > 0:
+while True:
+    print("waiting for a connection")
+    # print("read_list")
+    # print(read_list)
+    # print("write_list")
+    # print(write_list)
     read_socket, write_socket, exception_socket = select.select(read_list, write_list, read_list)
+    # print("read_socket")
+    # print(read_socket)
+    # print("write_socket")
+    # print(write_socket)
+    # print("exception_socket")
+    # print(exception_socket)
 
     for r_socket in read_socket:
-        if r_socket in server:
+        if r_socket is server:
             connection, client_address = r_socket.accept()
             connection.setblocking(False) # TODO: NEED??
             read_list.append(connection)
         else:
             try:
-                request = r_socket.recv(2**25).decode('utf-8')
+                req = r_socket.recv(2**25)
+                print(" ====================   REQUEST   ==================== ")
+                print(repr(req))
+                request = req.decode('utf-8')
+
                 request_list = request.split("\r\n")
 
-                path = request_list[0].split(" ")[1]
-                if path.startswith("/"):
-                    path = path[1:]
+                if request_list != ['']:
+                    path = request_list[0].split(" ")[1]
+                    if path.startswith("/"):
+                        path = path[1:]
 
-                if request_list[0].split(" ")[0] != 'GET':
-                    response = "HTTP/1.0 405 Method Not Allowed\r\nContent-Type: text/html\r\n\r\n"
-                    r_socket.send(bytes(response, encoding='utf-8')) # TODO: r_socket or connection, send or sendall?
-                    read_list.remove(r_socket)
-                    r_socket.close()
-                    continue
-
-                if not os.path.exists(path):
-                    if not (path.endswith(".html") or path.endswith(".htm")):
-                        path += ".html"
+                    if request_list[0].split(" ")[0] != 'GET':
+                        response = "HTTP/1.0 405 Method Not Allowed\r\nContent-Type: text/html\r\n\r\n"
+                        r_socket.send(bytes(response, encoding='utf-8')) 
+                        read_list.remove(r_socket)
+                        r_socket.close()
 
                     if not os.path.exists(path):
-                        response = "HTTP/1.0 404 Not Found\r\nContent-Type: text/html\r\n\r\n"
-                        r_socket.send(bytes(response, encoding='utf-8'))
-                    else:
+                        if not (path.endswith(".html") or path.endswith(".htm")):
+                            path += ".html"
+
+                        if not os.path.exists(path):
+                            response = "HTTP/1.0 404 Not Found\r\nContent-Type: text/html\r\n\r\n"
+                            r_socket.send(bytes(response, encoding='utf-8'))
+                        else:
+                            response = "HTTP/1.0 403 Forbidden\r\nContent-Type: text/html\r\n\r\n"
+                            r_socket.send(bytes(response, encoding='utf-8'))
+                    elif not (path.endswith(".html") or path.endswith(".htm")): 
                         response = "HTTP/1.0 403 Forbidden\r\nContent-Type: text/html\r\n\r\n"
                         r_socket.send(bytes(response, encoding='utf-8'))
-                elif not (path.endswith(".html") or path.endswith(".htm")): 
-                    response = "HTTP/1.0 403 Forbidden\r\nContent-Type: text/html\r\n\r\n"
-                    r_socket.send(bytes(response, encoding='utf-8'))
-                else:
-                    response = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n"
-                    r_socket.send(bytes(response, encoding='utf-8'))
-                    with open(path, 'r') as f:
-                        for line in f:
-                            r_socket.send(bytes(line, encoding='utf-8'))
-                    f.close()
-                    read_list.remove(r_socket)
-                    r_socket.close()
+                    else:
+                        response = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n"
+                        r_socket.send(bytes(response, encoding='utf-8'))
+                        with open(path, 'r') as f:
+                            for line in f:
+                                r_socket.send(bytes(line, encoding='utf-8'))
+                        f.close()
             finally:
+                print("closing connection")
                 read_list.remove(r_socket)
                 r_socket.close()
     

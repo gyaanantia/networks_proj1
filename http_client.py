@@ -23,17 +23,17 @@ def parse_url(url):
 
             if "/" in body[1]:
                 index_port_end = body[1].find("/")
-                port = body[1][0 : index_port_end - 1]
-                if port.isnumeric() == False:
+                port = body[1][0 : index_port_end]
+                if not port.isnumeric():
                     error_print("Invalid URL: ports must be integers")
                     sys.exit(1)
-                path = body[1][index_port_end:]
+                path = body[1][index_port_end + 1:]
 
             else:
                 port = body[1]
                 path = ""
 
-            return host, path, port
+            return host, path, int(port)
 
             # if port.isnumeric():
             #     if "/" in body[0]:
@@ -72,6 +72,7 @@ def parse_url(url):
 def send_request(url):
     url_host, url_path, url_port = parse_url(url)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    print(url_host, url_port)
     sock.connect((url_host, url_port))
 
     req = "GET /{} HTTP/1.0\r\nHost:{}\r\nAccept: text/html\r\n\r\n".format(
