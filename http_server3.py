@@ -40,45 +40,45 @@ while True:
                 connection.sendall(bytes(response, encoding='utf-8'))
                 connection.close()
 
-            else:
-                path = request_list[0].split(" ")[1]
-                # print("------------------   PATH   ------------------")
-                # print(path)
-                while path.startswith("/"):
-                    path = path[1:]
-                # print("------------------   PATH   ------------------")
-                # print(path)
+            
+            path = request_list[0].split(" ")[1]
+            # print("------------------   PATH   ------------------")
+            # print(path)
+            while path.startswith("/"):
+                path = path[1:]
+            # print("------------------   PATH   ------------------")
+            # print(path)
+            if not os.path.exists(path):
+                # print(2)
+                if not (path.endswith(".html") or path.endswith(".htm")): # TODO: Are we supposed to fix it like this?
+                    # print(2.5)
+                    path += ".html"
+
                 if not os.path.exists(path):
-                    # print(2)
-                    if not (path.endswith(".html") or path.endswith(".htm")): # TODO: Are we supposed to fix it like this?
-                        # print(2.5)
-                        path += ".html"
-
-                    if not os.path.exists(path):
-                        # print(3)
-                        # send a 404 response to the client
-                        response = "HTTP/1.0 404 Not Found\r\nContent-Type: text/html\r\n\r\n"
-                        connection.sendall(bytes(response, encoding='utf-8'))
-                    else:
-                        # print(4)
-                        # send a 403 response to the client
-                        response = "HTTP/1.0 403 Forbidden\r\nContent-Type: text/html\r\n\r\n"
-                        connection.sendall(bytes(response, encoding='utf-8'))
-
-                elif not (path.endswith(".html") or path.endswith(".htm")): 
-                    # print(5)
+                    # print(3)
+                    # send a 404 response to the client
+                    response = "HTTP/1.0 404 Not Found\r\nContent-Type: text/html\r\n\r\n"
+                    connection.sendall(bytes(response, encoding='utf-8'))
+                else:
+                    # print(4)
                     # send a 403 response to the client
                     response = "HTTP/1.0 403 Forbidden\r\nContent-Type: text/html\r\n\r\n"
                     connection.sendall(bytes(response, encoding='utf-8'))
-                else:
-                    # print(6)
-                    # send a 200 response to the client
-                    response = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n"
-                    connection.send(bytes(response, encoding='utf-8'))
-                    with open(path, 'r') as f:
-                        for line in f:
-                            connection.send(bytes(line, encoding='utf-8'))
-                    f.close()
+
+            elif not (path.endswith(".html") or path.endswith(".htm")): 
+                # print(5)
+                # send a 403 response to the client
+                response = "HTTP/1.0 403 Forbidden\r\nContent-Type: text/html\r\n\r\n"
+                connection.sendall(bytes(response, encoding='utf-8'))
+            else:
+                # print(6)
+                # send a 200 response to the client
+                response = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n"
+                connection.send(bytes(response, encoding='utf-8'))
+                with open(path, 'r') as f:
+                    for line in f:
+                        connection.send(bytes(line, encoding='utf-8'))
+                f.close()
       
     finally:
         print("closing connection")
