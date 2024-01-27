@@ -12,12 +12,7 @@ def parse_url(url):
         while body[-1] == "/":
             body = body[:-1]
         body = body.split(":")
-        if (len(body) == 2):  # TODO: this is wrong, the port does not always go at the end, the path goes after
-
-            # if second portion has /, take from 0 to that index
-            # eg. http://moore.wot.eecs.northwestern.edu:10002/rfc2616.html
-            # vs. http://portquiz.net:8080/ or http://portquiz.net:8080
-            # http://moore.wot.eecs.northwestern.edu/rfc2616.html
+        if (len(body) == 2):
 
             host = body[0]
 
@@ -58,7 +53,6 @@ def parse_url(url):
 def send_request(url):
     url_host, url_path, url_port = parse_url(url)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    print(url_host, url_port)
     sock.connect((url_host, url_port))
 
     req = "GET /{} HTTP/1.0\r\nHost:{}\r\nAccept: text/html\r\n\r\n".format(

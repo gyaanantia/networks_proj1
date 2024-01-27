@@ -11,7 +11,7 @@ server_address = ("", int(sys.argv[1]))
 
 server = socket.create_server(server_address, family=socket.AF_INET, backlog=100)
 
-server.setblocking(False) # making everything non-blocking
+server.setblocking(False)
 
 
 read_list = [server]
@@ -19,28 +19,16 @@ read_list = [server]
 
 while True:
     print("waiting for a connection")
-    # print("read_list")
-    # print(read_list)
-    # print("write_list")
-    # print(write_list)
     read_socket, _, _ = select.select(read_list, [], read_list)
-    # print("read_socket")
-    # print(read_socket)
-    # print("write_socket")
-    # print(write_socket)
-    # print("exception_socket")
-    # print(exception_socket)
 
     for r_socket in read_socket:
         if r_socket is server:
             connection, client_address = r_socket.accept()
-            connection.setblocking(False) # TODO: NEED??
+            connection.setblocking(False)
             read_list.append(connection)
         else:
             try:
                 req = r_socket.recv(2**25)
-                print(" ====================   REQUEST   ==================== ")
-                print(repr(req))
                 request = req.decode('utf-8')
 
                 request_list = request.split("\r\n")
@@ -79,14 +67,12 @@ while True:
 
                 read_list.remove(r_socket)
             except UnicodeDecodeError:
-                # print("UnicodeDecodeError")
                 if req == b'\xff\xf4\xff\xfd\x06':
                     print("telnet end of request")
                 else:
                     response = "HTTP/1.0 400 Bad Request\r\nContent-Type: text/html\r\n\r\n"
                     r_socket.send(bytes(response, encoding='utf-8'))
                 read_list.remove(r_socket)
-                # print("removed r_socket")
             finally:
                 print("closing connection")
                 r_socket.close()
